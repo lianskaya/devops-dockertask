@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  balancer:
+    image: nginx:latest
+    ports:
+      - 80:80/tcp
+    volumes:
+      - /home/marina/devops-dockertask/nginx/etc:/etc/nginx/conf.d/
+    links:
+      - web
+      - tomcat
+  web:
+    build: .
+    volumes:
+      - /home/marina/devops-dockertask/web/etc/sites-enabled:/etc/apache2/sites-enabled
+      - /home/marina/devops-dockertask/web/www:/var/www/site
+    links:
+      - mysql57
+  mysql57:
+    image: percona:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - /home/marina/devops-dockertask/mysql/configs/my.cnf:/etc/mysql/conf.d/custom.cnf
+      - /home/marina/devops-dockertask/mysql/mysql:/var/lib/mysql
+  tomcat:
+    image: tomcat:8.5.35
+    container_name: tomcat
+    volumes:
+      - /home/marina/devops-dockertask/docker/myapp.war:/usr/local/tomcat/webapps/myapp.war
+    ports:
+      - 8080:8080/tcp
+    links:
+      - mysql57
